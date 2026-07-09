@@ -1,133 +1,82 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/constants/app_constants.dart';
+
+enum RoomCardStyle { primary, surface }
 
 class RoomCard extends StatelessWidget {
-  final String roomName;
-  final String hostName;
-  final int memberCount;
-  final String genre;
-  final String imageUrl;
+  final String title;
+  final String subtitle;
+  final IconData actionIcon;
+  final RoomCardStyle cardStyle;
   final VoidCallback? onTap;
 
   const RoomCard({
     super.key,
-    required this.roomName,
-    required this.hostName,
-    required this.memberCount,
-    required this.genre,
-    required this.imageUrl,
+    required this.title,
+    required this.subtitle,
+    required this.actionIcon,
+    this.cardStyle = RoomCardStyle.primary,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isPrimary = cardStyle == RoomCardStyle.primary;
+    final bgColor = isPrimary
+        ? AppColors.primary
+        : AppColors.surfaceContainerLow;
+    final textColor = isPrimary
+        ? AppColors.onPrimary
+        : AppColors.onSurfaceVariant;
+    final iconBgColor = isPrimary
+        ? AppColors.onPrimary.withAlpha(30)
+        : AppColors.surfaceContainerHigh;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppConstants.spacingLg),
         decoration: BoxDecoration(
-          color: AppColors.cardOverlay,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.outline, width: 0.5),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(AppConstants.radiusXl),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Album art thumbnail
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(20),
+            // Icon button
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
               ),
-              child: Image.network(
-                imageUrl,
-                width: 84,
-                height: 84,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 84,
-                  height: 84,
-                  color: AppColors.surfaceDark2,
-                  child: const Icon(
-                    Icons.headphones_rounded,
-                    color: AppColors.secondaryText,
-                  ),
-                ),
-              ),
+              child: Icon(actionIcon, color: textColor, size: 22),
             ),
 
-            // Room info
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      roomName,
-                      style: AppTextStyles.headingSmall.copyWith(fontSize: 16),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text('by $hostName', style: AppTextStyles.caption),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        // Genre chip
-                        _Chip(label: genre),
-                        const SizedBox(width: 8),
-                        // Member count
-                        const Icon(
-                          Icons.people_rounded,
-                          color: AppColors.secondaryText,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$memberCount listening',
-                          style: AppTextStyles.caption,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+            const SizedBox(height: AppConstants.spacingXl),
+
+            // Title
+            Text(
+              title,
+              style: AppTextStyles.titleLarge.copyWith(color: textColor),
             ),
 
-            // Chevron
-            const Padding(
-              padding: EdgeInsets.only(right: 16),
-              child: Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.secondaryText,
-                size: 20,
+            const SizedBox(height: 4),
+
+            // Subtitle
+            Text(
+              subtitle,
+              style: AppTextStyles.body.copyWith(
+                color: textColor.withAlpha(isPrimary ? 200 : 180),
+                fontSize: 14,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-
-  const _Chip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppColors.accentSurface,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.caption.copyWith(color: AppColors.accent),
       ),
     );
   }

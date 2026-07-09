@@ -3,71 +3,104 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 abstract final class AppTextStyles {
-  static TextStyle headingLarge = GoogleFonts.inter(
+  // Headline Large — 32px, SemiBold
+  static TextStyle get headingLarge => GoogleFonts.inter(
     fontSize: 32,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.64,
     color: AppColors.primaryText,
-    letterSpacing: -0.8,
-    height: 1.2,
+    height: 1.25,
   );
 
-  static TextStyle headingMedium = GoogleFonts.inter(
-    fontSize: 24,
+  // Headline Medium — 28px, Medium
+  static TextStyle get headingMedium => GoogleFonts.inter(
+    fontSize: 28,
+    fontWeight: FontWeight.w500,
+    letterSpacing: -0.28,
+    color: AppColors.primaryText,
+    height: 1.29,
+  );
+
+  // Title Large — 22px, Medium
+  static TextStyle get titleLarge => GoogleFonts.inter(
+    fontSize: 22,
+    fontWeight: FontWeight.w500,
+    color: AppColors.primaryText,
+    height: 1.27,
+  );
+
+  // Title Medium — 18px, SemiBold
+  static TextStyle get titleMedium => GoogleFonts.inter(
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.primaryText,
-    letterSpacing: -0.4,
-    height: 1.3,
+    height: 1.33,
   );
 
-  static TextStyle headingSmall = GoogleFonts.inter(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
+  // Body Large — 18px, Regular
+  static TextStyle get bodyLarge => GoogleFonts.inter(
+    fontSize: 18,
+    fontWeight: FontWeight.w400,
     color: AppColors.primaryText,
-    letterSpacing: -0.2,
-    height: 1.3,
+    height: 1.56,
   );
 
-  static TextStyle body = GoogleFonts.inter(
+  // Body Medium — 16px, Regular
+  static TextStyle get body => GoogleFonts.inter(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.primaryText,
     height: 1.5,
   );
 
-  static TextStyle bodyMedium = GoogleFonts.inter(
+  // Label Large — 14px, Medium
+  static TextStyle get labelLarge => GoogleFonts.inter(
     fontSize: 14,
-    fontWeight: FontWeight.w400,
-    color: AppColors.secondaryText,
-    height: 1.5,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.1,
+    color: AppColors.primaryText,
+    height: 1.43,
   );
 
-  static TextStyle caption = GoogleFonts.inter(
+  // Label Small — 12px, Medium
+  static TextStyle get labelSmall => GoogleFonts.inter(
     fontSize: 12,
     fontWeight: FontWeight.w500,
+    letterSpacing: 0.5,
     color: AppColors.secondaryText,
-    letterSpacing: 0.3,
-    height: 1.4,
+    height: 1.33,
   );
 
-  static TextStyle button = GoogleFonts.inter(
-    fontSize: 15,
+  // Caption — 12px, Regular
+  static TextStyle get caption => GoogleFonts.inter(
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.secondaryText,
+    height: 1.33,
+  );
+
+  // Button — 16px, SemiBold
+  static TextStyle get button => GoogleFonts.inter(
+    fontSize: 16,
     fontWeight: FontWeight.w600,
+    color: AppColors.onPrimary,
     letterSpacing: 0.1,
-    height: 1.0,
   );
 
-  static TextStyle label = GoogleFonts.inter(
-    fontSize: 13,
-    fontWeight: FontWeight.w500,
+  // Overline — 11px, SemiBold, all-caps feel
+  static TextStyle get overline => GoogleFonts.inter(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 1.2,
     color: AppColors.secondaryText,
-    letterSpacing: 0.2,
+    height: 1.45,
   );
 
-  static TextStyle roomCode = GoogleFonts.inter(
-    fontSize: 48,
+  // Mono / code display (room code numbers)
+  static TextStyle get roomCode => GoogleFonts.inter(
+    fontSize: 56,
     fontWeight: FontWeight.w700,
-    color: AppColors.primaryText,
-    letterSpacing: 12,
-    height: 1.0,
+    letterSpacing: 8,
+    color: AppColors.primary,
   );
 }

@@ -3,84 +3,157 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-abstract final class AppTheme {
-  static ThemeData get dark {
-    const colorScheme = ColorScheme(
-      brightness: Brightness.dark,
-      primary: AppColors.accent,
-      onPrimary: Colors.white,
-      primaryContainer: AppColors.accentSurface,
-      onPrimaryContainer: AppColors.primaryText,
-      secondary: AppColors.secondaryText,
-      onSecondary: Colors.white,
-      secondaryContainer: AppColors.surfaceDark2,
-      onSecondaryContainer: AppColors.primaryText,
-      tertiary: AppColors.accentDim,
-      onTertiary: Colors.white,
-      error: AppColors.errorColor,
-      onError: Colors.white,
-      surface: AppColors.surfaceDark,
-      onSurface: AppColors.primaryText,
-      outline: AppColors.outline,
-      outlineVariant: AppColors.outline,
-    );
+final class AppTheme {
+  AppTheme._();
 
+  static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.backgroundDark,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      brightness: Brightness.light,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.primary,
+        onPrimary: AppColors.onPrimary,
+        primaryContainer: AppColors.primaryContainer,
+        onPrimaryContainer: AppColors.onPrimaryContainer,
+        secondary: AppColors.secondary,
+        onSecondary: AppColors.onPrimary,
+        secondaryContainer: AppColors.secondaryContainer,
+        onSecondaryContainer: AppColors.onSecondaryContainer,
+        surface: AppColors.surface,
+        onSurface: AppColors.onSurface,
+        onSurfaceVariant: AppColors.onSurfaceVariant,
+        outline: AppColors.outline,
+        outlineVariant: AppColors.outlineVariant,
+        error: AppColors.error,
+        onError: AppColors.onError,
+        errorContainer: AppColors.errorContainer,
+        inverseSurface: AppColors.inverseSurface,
+        onInverseSurface: AppColors.inverseOnSurface,
+        inversePrimary: AppColors.inversePrimary,
+        shadow: AppColors.shadow,
+        scrim: AppColors.scrim,
+        surfaceContainerLowest: AppColors.surfaceContainerLowest,
+        surfaceContainerLow: AppColors.surfaceContainerLow,
+        surfaceContainer: AppColors.surfaceContainer,
+        surfaceContainerHigh: AppColors.surfaceContainerHigh,
+        surfaceContainerHighest: AppColors.surfaceContainerHighest,
+      ),
+      scaffoldBackgroundColor: AppColors.background,
+      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.background,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        iconTheme: const IconThemeData(color: AppColors.primaryText),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.onSurface, size: 24),
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: AppColors.onSurface,
+          letterSpacing: 0,
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: AppColors.background,
+        ),
       ),
-      cardTheme: CardThemeData(
-        color: AppColors.cardOverlay,
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.onSurfaceVariant,
+        type: BottomNavigationBarType.fixed,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceDark2,
+        fillColor: AppColors.surfaceContainerLow,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(
+            color: AppColors.outlineVariant,
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(
+            color: AppColors.outlineVariant,
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        hintStyle: GoogleFonts.inter(
-          color: AppColors.secondaryText,
-          fontSize: 15,
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
-          vertical: 18,
+          vertical: 16,
+        ),
+        hintStyle: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.outline,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          minimumSize: const Size(double.infinity, 52),
+          shape: const StadiumBorder(),
+          elevation: 0,
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          minimumSize: const Size(double.infinity, 52),
+          shape: const StadiumBorder(),
+          side: const BorderSide(color: AppColors.outlineVariant),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       sliderTheme: SliderThemeData(
-        activeTrackColor: AppColors.accent,
-        inactiveTrackColor: AppColors.outline,
-        thumbColor: Colors.white,
+        activeTrackColor: AppColors.onSurface,
+        inactiveTrackColor: AppColors.surfaceContainerHigh,
+        thumbColor: AppColors.onSurface,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
         trackHeight: 3,
-        overlayColor: AppColors.accent.withValues(alpha: 0.2),
-      ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.surfaceDark,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
       ),
       dividerTheme: const DividerThemeData(
-        color: AppColors.outline,
+        color: AppColors.outlineVariant,
         thickness: 0.5,
         space: 0,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceContainerLow,
+        labelStyle: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.onSurface,
+        ),
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
       ),
     );
   }

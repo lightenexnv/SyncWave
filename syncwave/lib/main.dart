@@ -2,13 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/signup_screen.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/home/create_room_screen.dart';
+import 'screens/home/join_room_screen.dart';
+import 'screens/player/now_playing_screen.dart';
+import 'screens/player/members_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+    ),
+  );
+
   runApp(const SyncWaveApp());
 }
 
@@ -20,8 +38,19 @@ class SyncWaveApp extends StatelessWidget {
     return MaterialApp(
       title: 'SyncWave',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
-      home: const SplashScreen(),
+      theme: AppTheme.light,
+      initialRoute: '/',
+      routes: {
+        '/': (_) => const SplashScreen(),
+        '/onboarding': (_) => const OnboardingScreen(),
+        '/login': (_) => const LoginScreen(),
+        '/signup': (_) => const SignupScreen(),
+        '/home': (_) => const HomeScreen(),
+        '/create-room': (_) => const CreateRoomScreen(),
+        '/join-room': (_) => const JoinRoomScreen(),
+        '/now-playing': (_) => const NowPlayingScreen(),
+        '/members': (_) => const MembersScreen(),
+      },
     );
   }
 }

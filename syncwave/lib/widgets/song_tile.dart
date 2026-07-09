@@ -1,51 +1,39 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/constants/app_constants.dart';
 import '../models/song_model.dart';
+
+enum SongTileVariant { normal, nowPlaying }
 
 class SongTile extends StatelessWidget {
   final SongModel song;
-  final bool isPlaying;
+  final SongTileVariant variant;
   final VoidCallback? onTap;
-  final int? queueNumber;
+  final VoidCallback? onMore;
 
   const SongTile({
     super.key,
     required this.song,
-    this.isPlaying = false,
+    this.variant = SongTileVariant.normal,
     this.onTap,
-    this.queueNumber,
+    this.onMore,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isNowPlaying = variant == SongTileVariant.nowPlaying;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
           children: [
-            // Album Artwork
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                song.albumArtUrl,
-                width: 52,
-                height: 52,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 52,
-                  height: 52,
-                  color: AppColors.surfaceDark2,
-                  child: const Icon(
-                    Icons.music_note_rounded,
-                    color: AppColors.secondaryText,
-                    size: 22,
-                  ),
-                ),
-              ),
-            ),
+            // Album Art
+            _AlbumArt(url: song.albumArtUrl, isActive: isNowPlaying),
+
             const SizedBox(width: 14),
 
             // Song Info
@@ -55,39 +43,100 @@ class SongTile extends StatelessWidget {
                 children: [
                   Text(
                     song.title,
-                    style: AppTextStyles.body.copyWith(
-                      color: isPlaying
-                          ? AppColors.accent
-                          : AppColors.primaryText,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: isNowPlaying
+                        ? AppTextStyles.labelLarge.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          )
+                        : AppTextStyles.labelLarge.copyWith(
+                            color: AppColors.onSurface,
+                          ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
                     song.artist,
-                    style: AppTextStyles.caption,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
 
-            // Duration / Playing indicator
-            if (isPlaying)
-              const Icon(
-                Icons.equalizer_rounded,
-                color: AppColors.accent,
-                size: 20,
-              )
-            else
-              Text(song.duration, style: AppTextStyles.caption),
+            // More button
+            if (onMore != null)
+              IconButton(
+                onPressed: onMore,
+                icon: const Icon(
+                  Icons.more_horiz,
+                  color: AppColors.onSurfaceVariant,
+                  size: 20,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: AppConstants.iconButtonSize,
+                  minHeight: AppConstants.iconButtonSize,
+                ),
+              ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AlbumArt extends StatelessWidget {
+  final String url;
+  final bool isActive;
+
+  const _AlbumArt({required this.url, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+          child: Image.network(
+            url,
+            width: AppConstants.songTileImageSize,
+            height: AppConstants.songTileImageSize,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              width: AppConstants.songTileImageSize,
+              height: AppConstants.songTileImageSize,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+              ),
+              child: const Icon(
+                Icons.music_note_rounded,
+                color: AppColors.outline,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+        if (isActive)
+          Container(
+            width: AppConstants.songTileImageSize,
+            height: AppConstants.songTileImageSize,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withAlpha(40),
+              borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+            ),
+            child: const Icon(
+              Icons.bar_chart_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
+          ),
+      ],
     );
   }
 }
