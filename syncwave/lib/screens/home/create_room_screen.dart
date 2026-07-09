@@ -3,208 +3,268 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/constants/app_constants.dart';
-import '../../widgets/custom_button.dart';
-import '../../widgets/user_avatar.dart';
 import '../../models/user_model.dart';
-import '../player/members_screen.dart';
+import '../../widgets/user_avatar.dart';
 
 class CreateRoomScreen extends StatelessWidget {
   const CreateRoomScreen({super.key});
 
-  static final List<UserModel> _members = [
-    UserModel(
-      name: 'Alex Rivera',
-      avatarUrl: 'https://picsum.photos/seed/11/80/80',
-      isHost: true,
-    ),
-    UserModel(
-      name: 'Jordan Lee',
-      avatarUrl: 'https://picsum.photos/seed/22/80/80',
-    ),
-    UserModel(
-      name: 'Sam Chen',
-      avatarUrl: 'https://picsum.photos/seed/33/80/80',
-    ),
-  ];
+  // TODO: This room code should come from Firebase Firestore room creation
+  static const String _roomCode = '482931';
 
   @override
   Widget build(BuildContext context) {
-    const code = AppConstants.dummyRoomCode;
-    final formattedCode = '${code.substring(0, 3)} ${code.substring(3)}';
-
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.surfaceContainerLow,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
+        child: Column(
+          children: [
+            // App Bar
+            _AppBar(),
 
-              // Back button + title
-              Row(
-                children: [
-                  _BackButton(),
-                  const SizedBox(width: 16),
-                  Text('Room Code', style: AppTextStyles.headingSmall),
-                ],
-              ),
-
-              const SizedBox(height: 48),
-
-              // Room code display
-              Center(
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.pagePaddingH,
+                ),
                 child: Column(
                   children: [
-                    Text(
-                      'Share this code',
-                      style: AppTextStyles.caption.copyWith(letterSpacing: 0.4),
-                    ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacingXl),
 
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 28,
+                    // Title Section
+                    Text('Create Room', style: AppTextStyles.headingMedium),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Share this code with friends',
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.onSurfaceVariant,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceDark2,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: AppColors.outline,
-                          width: 0.5,
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingXl),
+
+                    // Room Code Display
+                    Text(_roomCode, style: AppTextStyles.roomCode),
+
+                    const SizedBox(height: AppConstants.spacingXl),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Copy Code
+                        SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Clipboard.setData(
+                                const ClipboardData(text: _roomCode),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Room code copied!'),
+                                  backgroundColor: AppColors.inverseSurface,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppConstants.radiusFull,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.copy_outlined, size: 18),
+                            label: const Text('Copy Code'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.onSurface,
+                              side: const BorderSide(
+                                color: AppColors.outlineVariant,
+                              ),
+                              shape: const StadiumBorder(),
+                              backgroundColor: AppColors.surface,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Text(formattedCode, style: AppTextStyles.roomCode),
+
+                        const SizedBox(width: AppConstants.spacingMd),
+
+                        // Share
+                        SizedBox(
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // TODO: Connect native share sheet here
+                            },
+                            icon: const Icon(Icons.share_rounded, size: 18),
+                            label: const Text('Share'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.onPrimary,
+                              shape: const StadiumBorder(),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(height: 8),
-                    Text(
-                      'Code expires in 24 hours',
-                      style: AppTextStyles.caption,
+                    const SizedBox(height: AppConstants.spacingXxl * 2),
+
+                    // Waiting Section
+                    _WaitingForFriends(),
+
+                    const SizedBox(height: AppConstants.spacingMd),
+
+                    // Live indicator
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.outline,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Room is live and discoverable',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
+
+                    const SizedBox(height: AppConstants.spacingXl),
+
+                    // Start Listening
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // TODO: Navigate after room is actually created in Firebase
+                          Navigator.of(context).pushNamed('/now-playing');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.onPrimary,
+                          shape: const StadiumBorder(),
+                          elevation: 0,
+                        ),
+                        child: const Text('Start Listening'),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingXl),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 32),
-
-              // Copy & Share buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomButton(
-                      label: 'Copy Code',
-                      variant: ButtonVariant.secondary,
-                      icon: Icons.copy_rounded,
-                      onTap: () {
-                        Clipboard.setData(const ClipboardData(text: code));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Room code copied!',
-                              style: AppTextStyles.body.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                            backgroundColor: AppColors.surfaceDark2,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CustomButton(
-                      label: 'Share',
-                      icon: Icons.ios_share_rounded,
-                      onTap: () {
-                        // TODO: Connect share sheet here
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              // Members Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'In the room  (${_members.length})',
-                    style: AppTextStyles.headingSmall.copyWith(fontSize: 17),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const MembersScreen()),
-                    ),
-                    child: Text(
-                      'See all',
-                      style: AppTextStyles.label.copyWith(
-                        color: AppColors.accent,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Members list
-              Row(
-                children: _members.map((member) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: UserAvatar(user: member, size: 48, showName: true),
-                  );
-                }).toList(),
-              ),
-
-              const Spacer(),
-
-              // End Room button
-              Padding(
-                padding: const EdgeInsets.only(bottom: 32),
-                child: CustomButton(
-                  label: 'End Room',
-                  variant: ButtonVariant.ghost,
-                  icon: Icons.stop_circle_outlined,
-                  onTap: () => Navigator.of(context).pop(),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _BackButton extends StatelessWidget {
+class _AppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDark2,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: AppColors.primaryText,
-          size: 18,
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingMd,
+        vertical: AppConstants.spacingSm,
       ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close_rounded, color: AppColors.onSurface),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'SyncWave',
+                style: AppTextStyles.titleMedium.copyWith(
+                  color: AppColors.primary,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
+}
+
+class _WaitingForFriends extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('WAITING FOR FRIENDS TO JOIN...', style: AppTextStyles.overline),
+        const SizedBox(height: AppConstants.spacingMd),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Host avatar (filled)
+            UserAvatar(
+              user: DummyUsers.host,
+              size: AppConstants.avatarLg,
+              showHostBadge: true,
+            ),
+
+            const SizedBox(width: AppConstants.spacingMd),
+
+            // Waiting slot 1
+            _WaitingSlot(hasDots: true),
+
+            const SizedBox(width: AppConstants.spacingMd),
+
+            // Waiting slot 2
+            _WaitingSlot(hasDots: false),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _WaitingSlot extends StatelessWidget {
+  final bool hasDots;
+
+  const _WaitingSlot({required this.hasDots});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: AppConstants.avatarLg,
+      height: AppConstants.avatarLg,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: AppColors.outlineVariant,
+          width: 1.5,
+          style: BorderStyle.solid,
+        ),
+        color: AppColors.surfaceContainerLow,
+      ),
+      child: hasDots
+          ? Center(
+              child: Text(
+                '···',
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.outline,
+                  letterSpacing: 2,
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
