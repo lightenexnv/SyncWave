@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/constants/app_constants.dart';
 import '../widgets/custom_button.dart';
-import 'auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -14,16 +15,21 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _fade;
+  late Animation<double> _fadeIn;
+  late Animation<Offset> _slideUp;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
+      duration: const Duration(milliseconds: 700),
       vsync: this,
-      duration: const Duration(milliseconds: 800),
     );
-    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _slideUp = Tween<Offset>(
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -35,100 +41,54 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: FadeTransition(
-          opacity: _fade,
-          child: Column(
-            children: [
-              // Illustration area
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Ambient glow
-                    Positioned(
-                      top: size.height * 0.06,
-                      child: Container(
-                        width: size.width * 0.75,
-                        height: size.width * 0.75,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              AppColors.accent.withValues(alpha: 0.18),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Central illustration
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Stacked avatar group
-                        _ListeningIllustration(),
-                        const SizedBox(height: 40),
-
-                        // Headline
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Text(
-                            'Music feels better\ntogether.',
-                            style: AppTextStyles.headingLarge.copyWith(
-                              height: 1.15,
-                              fontSize: 34,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Subtext
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: Text(
-                            'Create a room, invite friends, and listen to the same music in perfect sync — no matter where you are.',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              height: 1.6,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          opacity: _fadeIn,
+          child: SlideTransition(
+            position: _slideUp,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.pagePaddingH,
               ),
+              child: Column(
+                children: [
+                  const Spacer(flex: 3),
 
-              // Bottom actions
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-                child: Column(
-                  children: [
-                    CustomButton(
-                      label: 'Get Started',
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      ),
+                  // Logo Block
+                  _LogoBlock(),
+
+                  const SizedBox(height: AppConstants.spacingXl),
+
+                  // Brand name overline
+                  Text('SYNCWAVE', style: AppTextStyles.overline),
+
+                  const SizedBox(height: AppConstants.spacingMd),
+
+                  // Headline
+                  Text(
+                    'Music feels\nbetter together.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.headingLarge.copyWith(
+                      color: AppColors.onSurface,
+                      height: 1.2,
                     ),
-                    const SizedBox(height: 12),
-                    CustomButton(
-                      label: 'Sign In',
-                      variant: ButtonVariant.ghost,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+
+                  const Spacer(flex: 4),
+
+                  // Continue CTA
+                  CustomButton(
+                    label: 'Continue',
+                    trailingIcon: Icons.arrow_forward_rounded,
+                    onTap: () => Navigator.of(context).pushNamed('/login'),
+                  ),
+
+                  const SizedBox(height: AppConstants.spacingLg),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -136,87 +96,81 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 }
 
-// Onboarding illustration widget
-class _ListeningIllustration extends StatelessWidget {
+class _LogoBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final avatarUrls = [
-      'https://picsum.photos/seed/a1/80/80',
-      'https://picsum.photos/seed/a2/80/80',
-      'https://picsum.photos/seed/a3/80/80',
-      'https://picsum.photos/seed/a4/80/80',
-    ];
-
-    return SizedBox(
-      width: 200,
-      height: 120,
-      child: Stack(
-        alignment: Alignment.center,
+    return Container(
+      width: 140,
+      height: 140,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Central disc / vinyl visual
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const SweepGradient(
-                colors: [
-                  AppColors.accent,
-                  AppColors.accentDim,
-                  AppColors.accentSurface,
-                  AppColors.accent,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accent.withValues(alpha: 0.4),
-                  blurRadius: 40,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.waves_rounded,
-              color: Colors.white,
-              size: 36,
-            ),
+          // Waveform bars
+          SizedBox(
+            width: 72,
+            height: 44,
+            child: CustomPaint(painter: _WaveformPainter()),
           ),
-
-          // Surrounding avatars
-          ...List.generate(avatarUrls.length, (i) {
-            const positions = [
-              Offset(-88, -20),
-              Offset(-60, 30),
-              Offset(60, 30),
-              Offset(88, -20),
-            ];
-            return Positioned(
-              left: 100 + positions[i].dx - 20,
-              top: 60 + positions[i].dy - 20,
-              child: CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.surfaceDark2,
-                backgroundImage: NetworkImage(avatarUrls[i]),
-              ),
-            );
-          }),
-
-          // Sound waves (decorative rings)
-          ...[80.0, 112.0].map(
-            (r) => Container(
-              width: r,
-              height: r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.accent.withValues(alpha: 0.12),
-                  width: 1.5,
-                ),
-              ),
+          const SizedBox(height: 8),
+          Text(
+            'SyncWave',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.onSurface,
+              letterSpacing: -0.2,
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _WaveformPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bars = [
+      (0.08, 0.5),
+      (0.24, 0.78),
+      (0.40, 1.0),
+      (0.56, 0.82),
+      (0.72, 0.58),
+      (0.88, 0.38),
+    ];
+
+    final colors = [
+      const Color(0xFFFF6B6B),
+      const Color(0xFFFF8E53),
+      const Color(0xFFA855F7),
+      const Color(0xFF5856D6),
+      const Color(0xFF5856D6),
+      const Color(0xFF74B9FF),
+    ];
+
+    final barW = size.width * 0.10;
+
+    for (int i = 0; i < bars.length; i++) {
+      final x = bars[i].$1 * size.width;
+      final h = size.height * bars[i].$2;
+      final top = (size.height - h) / 2;
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x - barW / 2, top, barW, h),
+          Radius.circular(barW),
+        ),
+        Paint()
+          ..color = colors[i]
+          ..style = PaintingStyle.fill,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }

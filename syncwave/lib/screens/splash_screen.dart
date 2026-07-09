@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/theme/app_colors.dart';
-import '../core/theme/app_text_styles.dart';
-import '../core/constants/app_constants.dart';
-import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,37 +12,23 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _fade;
-  late Animation<double> _slide;
+  late Animation<double> _fadeIn;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
+      duration: const Duration(milliseconds: 900),
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
     );
-
-    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _slide = Tween<double>(
-      begin: 24,
-      end: 0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
+    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _controller.forward();
 
-    // Navigate to onboarding after the splash hold time
-    Future.delayed(const Duration(milliseconds: 2600), () {
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, animation, __) => FadeTransition(
-            opacity: animation,
-            child: const OnboardingScreen(),
-          ),
-          transitionDuration: const Duration(milliseconds: 500),
-        ),
-      );
+    // Navigate to onboarding after delay
+    Future.delayed(const Duration(milliseconds: 2200), () {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/onboarding');
+      }
     });
   }
 
@@ -57,56 +41,34 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.background,
       body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) => Opacity(
-            opacity: _fade.value,
-            child: Transform.translate(
-              offset: Offset(0, _slide.value),
-              child: child,
-            ),
-          ),
+        child: FadeTransition(
+          opacity: _fadeIn,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Logo Mark
+              // Logo Icon
               Container(
-                width: 80,
-                height: 80,
+                width: 88,
+                height: 88,
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                  color: AppColors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accent.withValues(alpha: 0.35),
-                      blurRadius: 32,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
                 ),
-                child: const Icon(
-                  Icons.waves_rounded,
-                  color: Colors.white,
-                  size: 40,
-                ),
+                child: const Center(child: _SyncWaveLogoIcon(size: 44)),
               ),
+
               const SizedBox(height: 20),
 
               // App Name
               Text(
-                AppConstants.appName,
-                style: AppTextStyles.headingLarge.copyWith(fontSize: 36),
-              ),
-              const SizedBox(height: 8),
-
-              // Tagline
-              Text(
-                AppConstants.tagline,
-                style: AppTextStyles.caption.copyWith(
-                  letterSpacing: 0.6,
-                  color: AppColors.secondaryText,
+                'SyncWave',
+                style: GoogleFonts.inter(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.onSurface,
+                  letterSpacing: -0.3,
                 ),
               ),
             ],
@@ -115,4 +77,64 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
+}
+
+// SyncWave waveform logo built with CustomPainter
+class _SyncWaveLogoIcon extends StatelessWidget {
+  final double size;
+
+  const _SyncWaveLogoIcon({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size * 0.6),
+      painter: _WaveformPainter(),
+    );
+  }
+}
+
+class _WaveformPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bars = [
+      (0.15, 0.5),
+      (0.28, 0.75),
+      (0.42, 1.0),
+      (0.55, 0.85),
+      (0.68, 0.6),
+      (0.82, 0.4),
+    ];
+
+    final colors = [
+      const Color(0xFFFF6B6B),
+      const Color(0xFFFF8E53),
+      const Color(0xFF9B59B6),
+      const Color(0xFF5856D6),
+      const Color(0xFF5856D6),
+      const Color(0xFF74B9FF),
+    ];
+
+    final barWidth = size.width * 0.09;
+
+    for (int i = 0; i < bars.length; i++) {
+      final x = bars[i].$1 * size.width;
+      final heightFraction = bars[i].$2;
+      final barHeight = size.height * heightFraction;
+      final top = (size.height - barHeight) / 2;
+
+      final paint = Paint()
+        ..color = colors[i]
+        ..style = PaintingStyle.fill;
+
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x - barWidth / 2, top, barWidth, barHeight),
+        Radius.circular(barWidth / 2),
+      );
+      canvas.drawRRect(rect, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
