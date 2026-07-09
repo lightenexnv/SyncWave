@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SyncWave - Sign In</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Design System Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#66676c",
+                        "surface-container-highest": "#e2e2e5",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#c6c6cb",
+                        "on-primary-fixed-variant": "#3631b4",
+                        "on-secondary-fixed-variant": "#45464e",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#e3e2e7",
+                        "surface-bright": "#f9f9fc",
+                        "on-primary-fixed": "#0c006a",
+                        "on-surface": "#1a1c1e",
+                        "on-tertiary-fixed": "#1a1b1f",
+                        "inverse-surface": "#2f3133",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#e2e2ec",
+                        "surface-tint": "#4f4ccd",
+                        "inverse-on-surface": "#f0f0f3",
+                        "surface-container-high": "#e8e8eb",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#e2e2ec",
+                        "surface-dim": "#d9dadd",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#62646c",
+                        "surface-variant": "#e2e2e5",
+                        "on-tertiary-fixed-variant": "#46464b",
+                        "background": "#f9f9fc",
+                        "error": "#ba1a1a",
+                        "on-background": "#1a1c1e",
+                        "surface-container-low": "#f3f3f6",
+                        "primary-fixed-dim": "#c2c1ff",
+                        "inverse-primary": "#c2c1ff",
+                        "secondary": "#5c5e66",
+                        "tertiary": "#4e4f53",
+                        "surface": "#f9f9fc",
+                        "primary-container": "#5856d6",
+                        "outline": "#777585",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#edeef1",
+                        "primary": "#3f3bbd",
+                        "on-surface-variant": "#464554",
+                        "on-primary-container": "#e7e4ff",
+                        "on-tertiary-container": "#e7e6eb",
+                        "secondary-fixed-dim": "#c5c6cf",
+                        "on-secondary-fixed": "#191b22",
+                        "outline-variant": "#c7c4d6",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#e2dfff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "max-width": "1280px",
+                        "gutter-md": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "32px",
+                        "gutter-sm": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "title-lg": ["22px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                        "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9fc;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .input-focus-ring:focus-within {
+            box-shadow: 0 0 0 2px rgba(88, 86, 214, 0.2);
+        }
+        .shadow-soft {
+            box-shadow: 0 4px 20px -2px rgba(88, 86, 214, 0.06);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col justify-center overflow-x-hidden">
+<!-- Top App Bar (Suppressed on Sign-In but logo remains for identity) -->
+<header class="fixed top-0 left-0 w-full px-margin-mobile md:px-margin-desktop py-6 flex justify-between items-center z-50">
+<div class="font-display-lg text-primary text-[24px] font-extrabold tracking-tighter">SyncWave</div>
+</header>
+<main class="relative flex-1 flex flex-col items-center justify-center px-margin-mobile sm:px-6 lg:px-8 py-12">
+<!-- Decorative Ambient Element -->
+<div class="absolute top-1/4 -right-24 w-96 h-96 bg-primary-fixed/20 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-1/4 -left-24 w-96 h-96 bg-secondary-fixed/20 rounded-full blur-[100px] pointer-events-none"></div>
+<!-- Auth Card Container -->
+<div class="w-full max-w-md space-y-10 relative z-10">
+<!-- Header Section -->
+<div class="text-center space-y-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface tracking-tight">
+                    Welcome back
+                </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Re-enter the rhythm of your world.
+                </p>
+</div>
+<!-- Form Section -->
+<form class="mt-8 space-y-6" onsubmit="return false">
+<div class="space-y-4">
+<!-- Email Field -->
+<div class="group">
+<label class="block font-label-lg text-label-lg text-on-surface-variant mb-2 ml-1" for="email">Email</label>
+<div class="relative input-focus-ring rounded-lg transition-all">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">mail</span>
+</div>
+<input class="block w-full pl-11 pr-4 py-4 bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md rounded-lg focus:ring-0 focus:border-primary transition-colors placeholder:text-outline/50" id="email" name="email" placeholder="name@example.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="group">
+<div class="flex justify-between items-center mb-2 ml-1">
+<label class="block font-label-lg text-label-lg text-on-surface-variant" for="password">Password</label>
+<a class="font-label-sm text-label-sm text-primary hover:underline transition-all" href="#">Forgot password?</a>
+</div>
+<div class="relative input-focus-ring rounded-lg transition-all">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">lock</span>
+</div>
+<input class="block w-full pl-11 pr-12 py-4 bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md rounded-lg focus:ring-0 focus:border-primary transition-colors placeholder:text-outline/50" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-4 flex items-center text-outline hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center ml-1">
+<input class="h-5 w-5 text-primary focus:ring-primary border-outline-variant rounded-md transition-colors" id="remember-me" name="remember-me" type="checkbox"/>
+<label class="ml-3 block font-label-lg text-label-lg text-on-surface-variant" for="remember-me">
+                        Keep me signed in
+                    </label>
+</div>
+<!-- Primary Action -->
+<div>
+<button class="w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-soft font-label-lg text-label-lg text-on-primary bg-primary-container hover:opacity-90 active:scale-[0.98] transition-all duration-200" type="submit">
+                        Sign In
+                    </button>
+</div>
+</form>
+<!-- Divider -->
+<div class="relative">
+<div aria-hidden="true" class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant/50"></div>
+</div>
+<div class="relative flex justify-center text-label-sm font-label-sm">
+<span class="px-4 bg-background text-outline">Or continue with</span>
+</div>
+</div>
+<!-- Social Login -->
+<div class="grid grid-cols-1 gap-4">
+<button class="w-full inline-flex justify-center items-center py-3.5 px-4 rounded-lg border border-outline-variant bg-surface-container-lowest font-label-lg text-label-lg text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all duration-200" type="button">
+<svg class="h-5 w-5 mr-3" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+                    Google
+                </button>
+</div>
+<!-- Footer -->
+<p class="text-center font-body-md text-body-md text-on-surface-variant">
+                Don't have an account? 
+                <a class="font-label-lg text-label-lg text-primary hover:underline transition-all" href="#">Sign up</a>
+</p>
+</div>
+</main>
+<!-- Visual Footer / Bottom Edge -->
+<footer class="py-8 text-center px-margin-mobile opacity-40">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-[0.2em]">SyncWave Harmony © 2024</p>
+</footer>
+<!-- Simple Micro-interactions Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Interaction: Toggle password visibility
+            const togglePass = document.querySelector('button[type="button"].absolute');
+            const passInput = document.querySelector('#password');
+            const icon = togglePass?.querySelector('.material-symbols-outlined');
+
+            togglePass?.addEventListener('click', () => {
+                const isPass = passInput.getAttribute('type') === 'password';
+                passInput.setAttribute('type', isPass ? 'text' : 'password');
+                if (icon) {
+                    icon.textContent = isPass ? 'visibility_off' : 'visibility';
+                }
+            });
+
+            // Smooth scale effect on form focus
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.parentElement.classList.add('scale-[1.01]');
+                });
+                input.addEventListener('blur', () => {
+                    input.parentElement.classList.remove('scale-[1.01]');
+                });
+            });
+        });
+    </script>
+</body></html>

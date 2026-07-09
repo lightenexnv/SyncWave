@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "583660859543",
+    "project_id": "syncwave-23d08",
+    "storage_bucket": "syncwave-23d08.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:583660859543:android:95baf4f4935962989a39d2",
+        "android_client_info": {
+          "package_name": "com.example.syncwave"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1FfAxYO-gVTqrr1DW1kCWmqZi-V35P00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
