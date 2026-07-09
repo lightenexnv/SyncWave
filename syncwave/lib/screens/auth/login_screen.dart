@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/constants/app_constants.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
-import '../home/home_screen.dart';
-import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,152 +17,162 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final bool _obscurePassword = true;
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   void _onContinue() {
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Connect Firebase email/password sign-in here
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+      // TODO: Connect Firebase Auth sign-in here
+      Navigator.of(context).pushReplacementNamed('/home');
     }
-  }
-
-  void _onGoogleSignIn() {
-    // TODO: Connect Google Sign-In here
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 24),
+        child: GestureDetector(
+          onTap: FocusScope.of(context).unfocus,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.pagePaddingH,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppConstants.spacingXl),
 
-                // Back button
-                _BackButton(),
+                  // Header Section
+                  _Header(),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: AppConstants.spacingXxl),
 
-                // Header
-                Text('Welcome\nback.', style: AppTextStyles.headingLarge),
-                const SizedBox(height: 8),
-                Text(
-                  'Sign in to continue listening together.',
-                  style: AppTextStyles.bodyMedium,
-                ),
-
-                const SizedBox(height: 48),
-
-                // Email field
-                CustomTextField(
-                  hint: 'Email address',
-                  prefixIcon: Icons.mail_outline_rounded,
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty)
-                      return 'Enter your email';
-                    if (!v.contains('@')) return 'Enter a valid email';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
-
-                // Password field
-                CustomTextField(
-                  hint: 'Password',
-                  prefixIcon: Icons.lock_outline_rounded,
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Enter your password';
-                    if (v.length < 6) return 'Minimum 6 characters';
-                    return null;
-                  },
-                ),
-
-                // Forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // TODO: Connect forgot password flow
+                  // Email Field
+                  CustomTextField(
+                    hint: 'your@email.com',
+                    label: 'Email',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.mail_outline_rounded,
+                    focusNode: _emailFocus,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) =>
+                        FocusScope.of(context).requestFocus(_passwordFocus),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Enter your email';
+                      if (!v.contains('@')) return 'Enter a valid email';
+                      return null;
                     },
-                    child: Text(
-                      'Forgot password?',
-                      style: AppTextStyles.label.copyWith(
-                        color: AppColors.accent,
+                  ),
+
+                  const SizedBox(height: AppConstants.spacingMd),
+
+                  // Password Field
+                  CustomTextField(
+                    hint: 'Password',
+                    label: 'Password',
+                    controller: _passwordController,
+                    isPassword: true,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    focusNode: _passwordFocus,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _onContinue(),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Enter your password';
+                      if (v.length < 6) return 'Password too short';
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: AppConstants.spacingSm),
+
+                  // Forgot password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // TODO: Navigate to forgot password screen
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                      ),
+                      child: Text(
+                        'Forgot password?',
+                        style: AppTextStyles.labelLarge.copyWith(
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: AppConstants.spacingLg),
 
-                // Continue button
-                CustomButton(label: 'Continue', onTap: _onContinue),
+                  // Continue Button
+                  CustomButton(label: 'Continue', onTap: _onContinue),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: AppConstants.spacingMd),
 
-                // Divider
-                _Divider(),
+                  // Divider
+                  _OrDivider(),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: AppConstants.spacingMd),
 
-                // Google sign in
-                CustomButton(
-                  label: 'Continue with Google',
-                  variant: ButtonVariant.ghost,
-                  icon: Icons.g_mobiledata_rounded,
-                  onTap: _onGoogleSignIn,
-                ),
+                  // Google Sign In
+                  CustomButton(
+                    label: 'Continue with Google',
+                    variant: ButtonVariant.ghost,
+                    leadingWidget: _GoogleIcon(),
+                    onTap: () {
+                      // TODO: Connect Google Sign-In here
+                      Navigator.of(context).pushReplacementNamed('/home');
+                    },
+                  ),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: AppConstants.spacingXl),
 
-                // Sign up link
-                Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const SignupScreen()),
-                    ),
-                    child: RichText(
-                      text: TextSpan(
-                        text: "Don't have an account? ",
-                        style: AppTextStyles.bodyMedium,
-                        children: [
-                          TextSpan(
-                            text: 'Sign up',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.accent,
-                              fontWeight: FontWeight.w600,
-                            ),
+                  // Sign up link
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pushNamed('/signup'),
+                      child: RichText(
+                        text: TextSpan(
+                          style: AppTextStyles.body.copyWith(
+                            color: AppColors.onSurfaceVariant,
                           ),
-                        ],
+                          children: [
+                            const TextSpan(text: "Don't have an account? "),
+                            TextSpan(
+                              text: 'Sign up',
+                              style: AppTextStyles.body.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 32),
-              ],
+                  const SizedBox(height: AppConstants.spacingXl),
+                ],
+              ),
             ),
           ),
         ),
@@ -171,40 +181,78 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class _BackButton extends StatelessWidget {
+class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDark2,
-          borderRadius: BorderRadius.circular(12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Welcome back', style: AppTextStyles.headingLarge),
+        const SizedBox(height: 8),
+        Text(
+          'Sign in to continue listening with your friends.',
+          style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceVariant),
         ),
-        child: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: AppColors.primaryText,
-          size: 18,
-        ),
-      ),
+      ],
     );
   }
 }
 
-class _Divider extends StatelessWidget {
+class _OrDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppColors.outline)),
+        const Expanded(child: Divider()),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text('or', style: AppTextStyles.caption),
+          child: Text(
+            'or',
+            style: AppTextStyles.caption.copyWith(color: AppColors.outline),
+          ),
         ),
-        const Expanded(child: Divider(color: AppColors.outline)),
+        const Expanded(child: Divider()),
       ],
     );
   }
+}
+
+class _GoogleIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: CustomPaint(painter: _GoogleLogoPainter()),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+
+    // Simplified Google G
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'G',
+        style: GoogleFonts.inter(
+          fontSize: size.width * 0.85,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF4285F4),
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(cx - textPainter.width / 2, cy - textPainter.height / 2),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }
