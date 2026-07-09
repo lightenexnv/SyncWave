@@ -8,76 +8,156 @@ import '../../widgets/song_tile.dart';
 class QueueScreen extends StatelessWidget {
   const QueueScreen({super.key});
 
-  static List<SongModel> get _songs => AppConstants.dummySongs.map((s) {
-    return SongModel(
-      title: s['title']!,
-      artist: s['artist']!,
-      albumArtUrl: 'https://picsum.photos/seed/${s['imageId']}/80/80',
-      duration: s['duration']!,
-    );
-  }).toList();
-
   @override
   Widget build(BuildContext context) {
-    final songs = _songs;
+    return DraggableScrollableSheet(
+      initialChildSize: 0.92,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppConstants.radiusXl),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.outlineVariant,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusFull,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.pagePaddingH,
+                  ),
+                  children: [
+                    const SizedBox(height: AppConstants.spacingMd),
+
+                    // Queue Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Up Next', style: AppTextStyles.headingMedium),
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusMd,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.shuffle_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // NOW PLAYING section
+                    Text('NOW PLAYING', style: AppTextStyles.overline),
+                    const SizedBox(height: AppConstants.spacingSm),
+
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusXl,
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: SongTile(
+                        song: DummySongs.nowPlaying,
+                        variant: SongTileVariant.nowPlaying,
+                        onMore: () {},
+                      ),
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // PLAYING NEXT section
+                    Text('PLAYING NEXT', style: AppTextStyles.overline),
+                    const SizedBox(height: AppConstants.spacingSm),
+
+                    // Queue list
+                    ...DummySongs.queue
+                        .skip(1)
+                        .map(
+                          (song) => SongTile(
+                            song: song,
+                            onTap: () {
+                              // TODO: Connect skip-to-song in audio player
+                            },
+                          ),
+                        ),
+
+                    const SizedBox(height: AppConstants.spacingXxl),
+
+                    // Autoplay footer
+                    _AutoplayFooter(),
+
+                    const SizedBox(height: AppConstants.spacingXxl),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AutoplayFooter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.sizeOf(context).height * 0.85,
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      padding: const EdgeInsets.all(AppConstants.spacingXl),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppConstants.radiusXl),
       ),
       child: Column(
         children: [
-          // Drag handle
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.outline,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
+          const Icon(
+            Icons.all_inclusive_rounded,
+            color: AppColors.primary,
+            size: 28,
           ),
-          const SizedBox(height: 20),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Up Next', style: AppTextStyles.headingSmall),
-                Text('${songs.length} songs', style: AppTextStyles.caption),
-              ],
-            ),
+          const SizedBox(height: AppConstants.spacingMd),
+          Text(
+            'Autoplay is on',
+            style: AppTextStyles.titleMedium.copyWith(fontSize: 16),
           ),
-
-          const SizedBox(height: 8),
-
-          const Divider(
-            color: AppColors.outline,
-            height: 1,
-            indent: 24,
-            endIndent: 24,
-          ),
-
-          // Song List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-              itemCount: songs.length,
-              itemBuilder: (context, index) {
-                return SongTile(
-                  song: songs[index],
-                  isPlaying: index == 0,
-                  onTap: () {
-                    // TODO: Connect play specific track in queue
-                  },
-                );
-              },
+          const SizedBox(height: 6),
+          Text(
+            'Similar music will play automatically\nwhen your queue ends.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body.copyWith(
+              color: AppColors.onSurfaceVariant,
+              fontSize: 14,
+              height: 1.5,
             ),
           ),
         ],

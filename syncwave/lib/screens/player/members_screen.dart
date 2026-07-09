@@ -5,169 +5,266 @@ import '../../core/constants/app_constants.dart';
 import '../../models/user_model.dart';
 import '../../widgets/user_avatar.dart';
 
-class MembersScreen extends StatelessWidget {
+class MembersScreen extends StatefulWidget {
   const MembersScreen({super.key});
 
-  static List<UserModel> get _members => AppConstants.dummyMembers.map((m) {
-    return UserModel(
-      name: m['name'] as String,
-      avatarUrl: 'https://picsum.photos/seed/${m['imageId']}/80/80',
-      isHost: m['isHost'] as bool,
-    );
-  }).toList();
-
   @override
-  Widget build(BuildContext context) {
-    final members = _members;
-
-    return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  _BackButton(),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Room Members', style: AppTextStyles.headingSmall),
-                      Text(
-                        '${members.length} listening now',
-                        style: AppTextStyles.caption,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Members list
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: members.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 4),
-                itemBuilder: (context, index) {
-                  return _MemberRow(member: members[index]);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  State<MembersScreen> createState() => _MembersScreenState();
 }
 
-class _MemberRow extends StatelessWidget {
-  final UserModel member;
+class _MembersScreenState extends State<MembersScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
 
-  const _MemberRow({required this.member});
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<UserModel> get _filteredListeners {
+    if (_query.isEmpty) return DummyUsers.listeners;
+    return DummyUsers.listeners
+        .where((u) => u.name.toLowerCase().contains(_query.toLowerCase()))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.cardOverlay,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.outline, width: 0.5),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        title: Text('Room Members', style: AppTextStyles.titleMedium),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // TODO: Show room options menu
+            },
+            icon: const Icon(Icons.more_vert_rounded),
+          ),
+        ],
       ),
-      child: Row(
+      body: Column(
         children: [
-          UserAvatar(user: member, size: 48),
-          const SizedBox(width: 14),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  member.name,
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.w500,
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.pagePaddingH,
+              vertical: AppConstants.spacingMd,
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (v) => setState(() => _query = v),
+              style: AppTextStyles.body,
+              decoration: InputDecoration(
+                hintText: 'Search members...',
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.outline,
+                  size: 20,
+                ),
+                filled: true,
+                fillColor: AppColors.surfaceContainerLow,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  member.isHost ? 'Host · Now playing' : 'Listening',
-                  style: AppTextStyles.caption,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
                 ),
-              ],
+              ),
             ),
           ),
 
-          // Host badge or listening indicator
-          if (member.isHost)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(999),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.pagePaddingH,
               ),
-              child: Text(
-                'Host',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            )
-          else
-            Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: AppColors.successColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 5),
+                // HOST Section
+                Text('HOST', style: AppTextStyles.overline),
+                const SizedBox(height: AppConstants.spacingMd),
+                _HostTile(user: DummyUsers.host),
+
+                const SizedBox(height: AppConstants.spacingXl),
+
+                // LISTENERS Section
                 Text(
-                  'Live',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.successColor,
-                  ),
+                  'LISTENERS (${DummyUsers.listeners.length})',
+                  style: AppTextStyles.overline,
                 ),
+
+                const SizedBox(height: AppConstants.spacingMd),
+
+                // Listener list
+                ..._filteredListeners.map((user) => _MemberTile(user: user)),
+
+                const SizedBox(height: AppConstants.spacingXxl),
               ],
             ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _BackButton extends StatelessWidget {
+class _HostTile extends StatelessWidget {
+  final UserModel user;
+
+  const _HostTile({required this.user});
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDark2,
-          borderRadius: BorderRadius.circular(12),
+    return Row(
+      children: [
+        UserAvatar(
+          user: user,
+          size: AppConstants.avatarXl,
+          showHostBadge: true,
         ),
-        child: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: AppColors.primaryText,
-          size: 18,
+        const SizedBox(width: AppConstants.spacingMd),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(user.name, style: AppTextStyles.titleLarge),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: user.status == 'listening'
+                          ? AppColors.primary
+                          : AppColors.outline,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _statusLabel(user.status),
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: user.status == 'listening'
+                          ? AppColors.primary
+                          : AppColors.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
+        // Volume control
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerLow,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.volume_up_rounded,
+            color: AppColors.onSurfaceVariant,
+            size: 20,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'listening':
+        return 'Listening';
+      case 'paused':
+        return 'Paused';
+      case 'offline':
+        return 'Offline';
+      default:
+        return status;
+    }
+  }
+}
+
+class _MemberTile extends StatelessWidget {
+  final UserModel user;
+
+  const _MemberTile({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          UserAvatar(
+            user: user,
+            size: AppConstants.avatarMd,
+            showStatusDot: false,
+          ),
+          const SizedBox(width: AppConstants.spacingMd),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(user.name, style: AppTextStyles.labelLarge),
+                const SizedBox(height: 2),
+                Text(
+                  _statusLabel(user.status),
+                  style: AppTextStyles.caption.copyWith(
+                    color: _statusColor(user.status),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'listening':
+        return 'Listening';
+      case 'paused':
+        return 'Paused';
+      case 'offline':
+        return 'Offline';
+      default:
+        return status;
+    }
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'listening':
+        return AppColors.onSurfaceVariant;
+      case 'paused':
+        return AppColors.outline;
+      case 'offline':
+        return AppColors.outline;
+      default:
+        return AppColors.outline;
+    }
   }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/constants/app_constants.dart';
+import '../../models/song_model.dart';
 import '../../models/user_model.dart';
+import '../../widgets/user_avatar.dart';
 import 'queue_screen.dart';
 import 'members_screen.dart';
 
@@ -14,210 +17,145 @@ class NowPlayingScreen extends StatefulWidget {
 
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   bool _isPlaying = true;
-  double _progress = 0.35;
+  bool _isLiked = false;
+  double _progress = 0.41; // 1:42 of 4:03
 
-  // Dummy current song
-  static const _song = {
-    'title': 'Blinding Lights',
-    'artist': 'The Weeknd',
-    'album': 'After Hours',
-    'imageId': '10',
-  };
+  final SongModel _song = DummySongs.nowPlaying;
 
-  static final _listeners = [
-    UserModel(
-      name: 'Alex Rivera',
-      avatarUrl: 'https://picsum.photos/seed/11/80/80',
-      isHost: true,
-    ),
-    UserModel(
-      name: 'Jordan Lee',
-      avatarUrl: 'https://picsum.photos/seed/22/80/80',
-    ),
-    UserModel(
-      name: 'Sam Chen',
-      avatarUrl: 'https://picsum.photos/seed/33/80/80',
-    ),
-    UserModel(
-      name: 'Taylor Park',
-      avatarUrl: 'https://picsum.photos/seed/44/80/80',
-    ),
-  ];
+  String _formatDuration(Duration d) {
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
 
-  String _formatTime(double progress) {
-    const totalSeconds = 202; // 3:22
-    final current = (totalSeconds * progress).round();
-    final min = current ~/ 60;
-    final sec = current % 60;
-    return '$min:${sec.toString().padLeft(2, '0')}';
+  Duration get _elapsed =>
+      Duration(seconds: (_song.duration.inSeconds * _progress).round());
+
+  Duration get _remaining => _song.duration - _elapsed;
+
+  void _openQueue() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const QueueScreen(),
+    );
+  }
+
+  void _openMembers() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const MembersScreen()));
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: Stack(
-        children: [
-          // Ambient background tint (blurred color wash)
-          Positioned(
-            top: -60,
-            left: -40,
-            child: Container(
-              width: size.width * 0.9,
-              height: size.width * 0.9,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.accent.withValues(alpha: 0.22),
-                    Colors.transparent,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            _PlayerHeader(onClose: () => Navigator.of(context).pop()),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.pagePaddingH,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: AppConstants.spacingMd),
+
+                    // Album Artwork Section
+                    _AlbumArtwork(
+                      imageUrl: _song.albumArtUrl,
+                      listenerCount: 4,
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // Song Info Section
+                    _SongInfo(
+                      song: _song,
+                      isLiked: _isLiked,
+                      onLike: () => setState(() => _isLiked = !_isLiked),
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // Progress Section
+                    _ProgressSection(
+                      progress: _progress,
+                      elapsed: _formatDuration(_elapsed),
+                      remaining: '-${_formatDuration(_remaining)}',
+                      onChanged: (v) => setState(() => _progress = v),
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // Player Controls
+                    _PlayerControls(
+                      isPlaying: _isPlaying,
+                      onPlayPause: () =>
+                          setState(() => _isPlaying = !_isPlaying),
+                      onPrevious: () {},
+                      onNext: () {},
+                      onShuffle: () {},
+                      onRepeat: () {},
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingXl),
+
+                    // Sync Footer Section
+                    _SyncFooter(
+                      onQueueTap: _openQueue,
+                      onMembersTap: _openMembers,
+                    ),
+
+                    const SizedBox(height: AppConstants.spacingXl),
                   ],
                 ),
               ),
             ),
-          ),
-
-          SafeArea(
-            child: Column(
-              children: [
-                // Top bar
-                _TopBar(
-                  onQueueTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => const QueueScreen(),
-                    );
-                  },
-                ),
-
-                const Spacer(flex: 1),
-
-                // Album Artwork
-                _AlbumArtwork(imageId: _song['imageId']!),
-
-                const SizedBox(height: 36),
-
-                // Song Info
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _song['title']!,
-                              style: AppTextStyles.headingMedium.copyWith(
-                                fontSize: 26,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _song['artist']!,
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // TODO: Toggle favorite / like via backend
-                        },
-                        icon: const Icon(
-                          Icons.favorite_border_rounded,
-                          color: AppColors.secondaryText,
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Progress Slider
-                _ProgressSection(
-                  progress: _progress,
-                  currentTime: _formatTime(_progress),
-                  totalTime: '3:22',
-                  onChanged: (v) => setState(() => _progress = v),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Player Controls
-                _PlayerControls(
-                  isPlaying: _isPlaying,
-                  onPlayPause: () => setState(() => _isPlaying = !_isPlaying),
-                  onPrevious: () {
-                    // TODO: Connect previous track
-                  },
-                  onNext: () {
-                    // TODO: Connect next track
-                  },
-                ),
-
-                const SizedBox(height: 36),
-
-                // Friends Listening Section
-                _FriendsSection(
-                  listeners: _listeners,
-                  onMembersTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const MembersScreen()),
-                  ),
-                ),
-
-                const Spacer(flex: 1),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-// Top bar with back and queue button
-class _TopBar extends StatelessWidget {
-  final VoidCallback onQueueTap;
+class _PlayerHeader extends StatelessWidget {
+  final VoidCallback onClose;
 
-  const _TopBar({required this.onQueueTap});
+  const _PlayerHeader({required this.onClose});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingMd,
+        vertical: AppConstants.spacingSm,
+      ),
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: onClose,
             icon: const Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: AppColors.primaryText,
-              size: 30,
+              size: 28,
+              color: AppColors.onSurface,
             ),
           ),
           Expanded(
             child: Column(
               children: [
+                Text('LISTENING ROOM', style: AppTextStyles.overline),
                 Text(
-                  'Now Playing',
-                  style: AppTextStyles.caption.copyWith(letterSpacing: 0.5),
-                ),
-                Text(
-                  'Chill Vibes 🌙',
-                  style: AppTextStyles.label.copyWith(
-                    color: AppColors.primaryText,
+                  'Late Night Drive',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -225,11 +163,12 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: onQueueTap,
+            onPressed: () {
+              // TODO: Show room options menu
+            },
             icon: const Icon(
-              Icons.queue_music_rounded,
-              color: AppColors.primaryText,
-              size: 26,
+              Icons.more_vert_rounded,
+              color: AppColors.onSurface,
             ),
           ),
         ],
@@ -238,161 +177,356 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// Large album artwork with shadow
 class _AlbumArtwork extends StatelessWidget {
-  final String imageId;
+  final String imageUrl;
+  final int listenerCount;
 
-  const _AlbumArtwork({required this.imageId});
+  const _AlbumArtwork({required this.imageUrl, required this.listenerCount});
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final artSize = size.width * 0.72;
+    final size =
+        MediaQuery.of(context).size.width - AppConstants.pagePaddingH * 2;
 
-    return Center(
-      child: Container(
-        width: artSize,
-        height: artSize,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accent.withValues(alpha: 0.25),
-              blurRadius: 50,
-              spreadRadius: 8,
-              offset: const Offset(0, 20),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 30,
-              offset: const Offset(0, 15),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+    return Stack(
+      children: [
+        // Album Art
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppConstants.radiusXl),
           child: Image.network(
-            'https://picsum.photos/seed/$imageId/400/400',
+            imageUrl,
+            width: size,
+            height: size * 0.82,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => Container(
-              color: AppColors.surfaceDark2,
+              width: size,
+              height: size * 0.82,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+              ),
               child: const Icon(
                 Icons.music_note_rounded,
-                color: AppColors.secondaryText,
-                size: 60,
+                color: AppColors.outline,
+                size: 64,
               ),
             ),
           ),
         ),
-      ),
+
+        // Listeners badge
+        Positioned(
+          top: 16,
+          right: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface.withAlpha(230),
+              borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.graphic_eq_rounded,
+                  size: 16,
+                  color: AppColors.onSurface,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '$listenerCount Listening',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-// Progress bar with timestamps
+class _SongInfo extends StatelessWidget {
+  final SongModel song;
+  final bool isLiked;
+  final VoidCallback onLike;
+
+  const _SongInfo({
+    required this.song,
+    required this.isLiked,
+    required this.onLike,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Mini prev track label (design shows "Lost Highway" chip)
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Lost Highway',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                song.title,
+                style: AppTextStyles.headingMedium.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                song.artist,
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Like button
+        IconButton(
+          onPressed: onLike,
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Icon(
+              isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              key: ValueKey(isLiked),
+              color: isLiked ? AppColors.primary : AppColors.onSurface,
+              size: 26,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProgressSection extends StatelessWidget {
   final double progress;
-  final String currentTime;
-  final String totalTime;
+  final String elapsed;
+  final String remaining;
   final ValueChanged<double> onChanged;
 
   const _ProgressSection({
     required this.progress,
-    required this.currentTime,
-    required this.totalTime,
+    required this.elapsed,
+    required this.remaining,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        children: [
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-            ),
-            child: Slider(value: progress, onChanged: onChanged),
+    return Column(
+      children: [
+        // Time labels
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(elapsed, style: AppTextStyles.caption),
+            Text(remaining, style: AppTextStyles.caption),
+          ],
+        ),
+
+        const SizedBox(height: 4),
+
+        // Progress slider
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            activeTrackColor: AppColors.onSurface,
+            inactiveTrackColor: AppColors.surfaceContainerHigh,
+            thumbColor: AppColors.onSurface,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(currentTime, style: AppTextStyles.caption),
-                Text(totalTime, style: AppTextStyles.caption),
-              ],
-            ),
-          ),
-        ],
-      ),
+          child: Slider(value: progress, onChanged: onChanged),
+        ),
+      ],
     );
   }
 }
 
-// Prev / Play-Pause / Next controls
 class _PlayerControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onPlayPause;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+  final VoidCallback onShuffle;
+  final VoidCallback onRepeat;
 
   const _PlayerControls({
     required this.isPlaying,
     required this.onPlayPause,
     required this.onPrevious,
     required this.onNext,
+    required this.onShuffle,
+    required this.onRepeat,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Shuffle
+        _ControlIconButton(
+          icon: Icons.shuffle_rounded,
+          onTap: onShuffle,
+          size: 22,
+        ),
+
+        // Previous
+        _ControlIconButton(
+          icon: Icons.skip_previous_rounded,
+          onTap: onPrevious,
+          size: 28,
+        ),
+
+        // Play / Pause
+        GestureDetector(
+          onTap: onPlayPause,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            child: Icon(
+              isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              size: 52,
+              color: AppColors.onSurface,
+            ),
+          ),
+        ),
+
+        // Next
+        _ControlIconButton(
+          icon: Icons.skip_next_rounded,
+          onTap: onNext,
+          size: 28,
+        ),
+
+        // Repeat
+        _ControlIconButton(
+          icon: Icons.repeat_rounded,
+          onTap: onRepeat,
+          size: 22,
+        ),
+      ],
+    );
+  }
+}
+
+class _ControlIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final double size;
+
+  const _ControlIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Icon(icon, size: size, color: AppColors.onSurface),
+      ),
+    );
+  }
+}
+
+class _SyncFooter extends StatelessWidget {
+  final VoidCallback onQueueTap;
+  final VoidCallback onMembersTap;
+
+  const _SyncFooter({required this.onQueueTap, required this.onMembersTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onMembersTap,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Shuffle
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.shuffle_rounded,
-              color: AppColors.secondaryText,
-              size: 22,
+          // Stacked Avatars
+          _StackedAvatars(),
+
+          const SizedBox(width: AppConstants.spacingMd),
+
+          // In Sync info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.sync_rounded,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'In Sync',
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text('Neil, Alex + 2 others', style: AppTextStyles.caption),
+              ],
             ),
           ),
 
-          // Previous
-          IconButton(
-            onPressed: onPrevious,
-            icon: const Icon(
-              Icons.skip_previous_rounded,
-              color: AppColors.primaryText,
-              size: 38,
-            ),
-          ),
-
-          // Play / Pause
-          _PlayButton(isPlaying: isPlaying, onTap: onPlayPause),
-
-          // Next
-          IconButton(
-            onPressed: onNext,
-            icon: const Icon(
-              Icons.skip_next_rounded,
-              color: AppColors.primaryText,
-              size: 38,
-            ),
-          ),
-
-          // Repeat
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.repeat_rounded,
-              color: AppColors.secondaryText,
-              size: 22,
+          // Queue button
+          GestureDetector(
+            onTap: onQueueTap,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.queue_music_rounded,
+                  size: 20,
+                  color: AppColors.onSurface,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Queue',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -401,152 +535,66 @@ class _PlayerControls extends StatelessWidget {
   }
 }
 
-class _PlayButton extends StatefulWidget {
-  final bool isPlaying;
-  final VoidCallback onTap;
+class _StackedAvatars extends StatelessWidget {
+  final List<UserModel> _members = const [
+    DummyUsers.currentUser,
+    UserModel(
+      id: 'u_alex',
+      name: 'Alex',
+      avatarUrl: 'https://picsum.photos/seed/alex/100',
+    ),
+  ];
 
-  const _PlayButton({required this.isPlaying, required this.onTap});
-
-  @override
-  State<_PlayButton> createState() => _PlayButtonState();
-}
-
-class _PlayButtonState extends State<_PlayButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 80),
-      reverseDuration: const Duration(milliseconds: 150),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 0.93,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const _StackedAvatars();
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder: (_, child) =>
-            Transform.scale(scale: _scale.value, child: child),
-        child: Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withValues(alpha: 0.15),
-                blurRadius: 20,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Icon(
-              widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              key: ValueKey(widget.isPlaying),
-              color: AppColors.backgroundDark,
-              size: 34,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+    const avatarSize = 32.0;
+    const overlap = 10.0;
+    final totalWidth =
+        avatarSize +
+        (_members.length - 1) * (avatarSize - overlap) +
+        avatarSize * 0.6;
 
-// Friends / listeners row
-class _FriendsSection extends StatelessWidget {
-  final List<UserModel> listeners;
-  final VoidCallback onMembersTap;
-
-  const _FriendsSection({required this.listeners, required this.onMembersTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Row(
+    return SizedBox(
+      width: totalWidth,
+      height: avatarSize,
+      child: Stack(
         children: [
-          // Stacked avatars
-          SizedBox(
-            width: 80,
-            height: 36,
-            child: Stack(
-              children: List.generate(
-                listeners.length.clamp(0, 3),
-                (i) => Positioned(
-                  left: i * 22.0,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppColors.backgroundDark,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundImage: NetworkImage(listeners[i].avatarUrl),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${listeners.length} friends listening',
-                  style: AppTextStyles.body.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text('in Chill Vibes 🌙', style: AppTextStyles.caption),
-              ],
-            ),
-          ),
-
-          GestureDetector(
-            onTap: onMembersTap,
+          // +2 badge
+          Positioned(
+            left: _members.length * (avatarSize - overlap),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              width: avatarSize,
+              height: avatarSize,
               decoration: BoxDecoration(
-                color: AppColors.surfaceDark2,
-                borderRadius: BorderRadius.circular(999),
+                color: AppColors.surfaceContainerHigh,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.background, width: 2),
               ),
-              child: Text(
-                'View all',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.primaryText,
+              child: Center(
+                child: Text(
+                  '+2',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
                 ),
               ),
             ),
           ),
+          // User avatars in reverse order so first is on top
+          for (int i = _members.length - 1; i >= 0; i--)
+            Positioned(
+              left: i * (avatarSize - overlap),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.background, width: 2),
+                ),
+                child: UserAvatar(user: _members[i], size: avatarSize),
+              ),
+            ),
         ],
       ),
     );
