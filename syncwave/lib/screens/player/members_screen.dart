@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -20,6 +21,20 @@ class _MembersScreenState extends State<MembersScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  UserModel get _dynamicHost {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    return currentUser != null
+        ? UserModel(
+            uid: currentUser.uid,
+            name: currentUser.displayName ?? currentUser.email?.split('@').first ?? 'Host',
+            email: currentUser.email ?? '',
+            avatarUrl: currentUser.photoURL,
+            isHost: true,
+            status: 'listening',
+          )
+        : DummyUsers.host;
   }
 
   List<UserModel> get _filteredListeners {
@@ -101,7 +116,7 @@ class _MembersScreenState extends State<MembersScreen> {
                 // HOST Section
                 Text('HOST', style: AppTextStyles.overline),
                 const SizedBox(height: AppConstants.spacingMd),
-                _HostTile(user: DummyUsers.host),
+                _HostTile(user: _dynamicHost),
 
                 const SizedBox(height: AppConstants.spacingXl),
 

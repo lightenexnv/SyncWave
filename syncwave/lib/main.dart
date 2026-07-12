@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
@@ -29,9 +30,28 @@ Future<void> main() async {
     ),
   );
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    print("FIREBASE INITIALIZATION CAUGHT ERROR: $e");
+  }
+
+  // Temporary database test to verify connection
+  try {
+    FirebaseDatabase.instance.ref("testing").set({
+      "message": "SyncWave Connected"
+    }).then((_) {
+      print("DATABASE TEST WRITE: SUCCESS");
+    }).catchError((error) {
+      print("DATABASE TEST WRITE: FAILED - $error");
+    });
+  } catch (e) {
+    print("DATABASE TEST WRITE CAUGHT ERROR: $e");
+  }
 
   runApp(const SyncWaveApp());
 }

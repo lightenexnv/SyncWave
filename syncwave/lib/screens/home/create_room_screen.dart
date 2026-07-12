@@ -53,8 +53,7 @@ class CreateRoomScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Copy Code
-                        SizedBox(
-                          height: 52,
+                        Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () {
                               Clipboard.setData(
@@ -76,6 +75,7 @@ class CreateRoomScreen extends StatelessWidget {
                             icon: const Icon(Icons.copy_outlined, size: 18),
                             label: const Text('Copy Code'),
                             style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 52),
                               foregroundColor: AppColors.onSurface,
                               side: const BorderSide(
                                 color: AppColors.outlineVariant,
@@ -89,8 +89,7 @@ class CreateRoomScreen extends StatelessWidget {
                         const SizedBox(width: AppConstants.spacingMd),
 
                         // Share
-                        SizedBox(
-                          height: 52,
+                        Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
                               // TODO: Connect native share sheet here
@@ -98,6 +97,7 @@ class CreateRoomScreen extends StatelessWidget {
                             icon: const Icon(Icons.share_rounded, size: 18),
                             label: const Text('Share'),
                             style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(0, 52),
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.onPrimary,
                               shape: const StadiumBorder(),

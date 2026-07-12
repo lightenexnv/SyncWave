@@ -13,6 +13,8 @@ class CustomButton extends StatelessWidget {
   final Widget? leadingWidget;
   final bool isLoading;
   final double? width;
+  final double height;
+  final double borderRadius;
 
   const CustomButton({
     super.key,
@@ -24,18 +26,24 @@ class CustomButton extends StatelessWidget {
     this.leadingWidget,
     this.isLoading = false,
     this.width,
+    this.height = 56,
+    this.borderRadius = 12,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity,
-      height: 52,
+      height: height,
       child: _buildButton(),
     );
   }
 
   Widget _buildButton() {
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    );
+
     switch (variant) {
       case ButtonVariant.primary:
         return ElevatedButton(
@@ -43,8 +51,9 @@ class CustomButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.onPrimary,
-            shape: const StadiumBorder(),
+            shape: shape,
             elevation: 0,
+            shadowColor: Colors.transparent,
           ),
           child: _buildContent(AppColors.onPrimary),
         );
@@ -55,8 +64,9 @@ class CustomButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.surfaceContainerHigh,
             foregroundColor: AppColors.onSurface,
-            shape: const StadiumBorder(),
+            shape: shape,
             elevation: 0,
+            shadowColor: Colors.transparent,
           ),
           child: _buildContent(AppColors.onSurface),
         );
@@ -65,11 +75,16 @@ class CustomButton extends StatelessWidget {
         return OutlinedButton(
           onPressed: isLoading ? null : onTap,
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            shape: const StadiumBorder(),
-            side: const BorderSide(color: AppColors.outlineVariant, width: 1),
+            backgroundColor: AppColors.surfaceContainerLowest,
+            foregroundColor: AppColors.onSurface,
+            shape: shape,
+            side: BorderSide(
+              color: AppColors.outlineVariant.withOpacity(0.4),
+              width: 1,
+            ),
+            elevation: 0,
           ),
-          child: _buildContent(AppColors.primary),
+          child: _buildContent(AppColors.onSurface),
         );
     }
   }
@@ -94,7 +109,15 @@ class CustomButton extends StatelessWidget {
     }
 
     children.add(
-      Text(label, style: AppTextStyles.button.copyWith(color: contentColor)),
+      Text(
+        label,
+        style: AppTextStyles.button.copyWith(
+          color: contentColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+      ),
     );
 
     if (trailingIcon != null) {

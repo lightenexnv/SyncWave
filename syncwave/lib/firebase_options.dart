@@ -51,6 +51,7 @@ class DefaultFirebaseOptions {
     authDomain: 'syncwave-23d08.firebaseapp.com',
     storageBucket: 'syncwave-23d08.firebasestorage.app',
     measurementId: 'G-0HF50CMXZS',
+    databaseURL: 'https://syncwave-23d08-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -59,6 +60,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '583660859543',
     projectId: 'syncwave-23d08',
     storageBucket: 'syncwave-23d08.firebasestorage.app',
+    databaseURL: 'https://syncwave-23d08-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -68,6 +70,7 @@ class DefaultFirebaseOptions {
     projectId: 'syncwave-23d08',
     storageBucket: 'syncwave-23d08.firebasestorage.app',
     iosBundleId: 'com.example.syncwave',
+    databaseURL: 'https://syncwave-23d08-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -78,5 +81,6 @@ class DefaultFirebaseOptions {
     authDomain: 'syncwave-23d08.firebaseapp.com',
     storageBucket: 'syncwave-23d08.firebasestorage.app',
     measurementId: 'G-73R6D91NLY',
+    databaseURL: 'https://syncwave-23d08-default-rtdb.firebaseio.com',
   );
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -536,24 +537,34 @@ class _SyncFooter extends StatelessWidget {
 }
 
 class _StackedAvatars extends StatelessWidget {
-  final List<UserModel> _members = const [
-    DummyUsers.currentUser,
-    UserModel(
-      id: 'u_alex',
-      name: 'Alex',
-      avatarUrl: 'https://picsum.photos/seed/alex/100',
-    ),
-  ];
-
   const _StackedAvatars();
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final defaultUser = currentUser != null
+        ? UserModel(
+            uid: currentUser.uid,
+            name: currentUser.displayName ?? currentUser.email?.split('@').first ?? 'User',
+            email: currentUser.email ?? '',
+            avatarUrl: currentUser.photoURL,
+          )
+        : DummyUsers.currentUser;
+
+    final List<UserModel> members = [
+      defaultUser,
+      const UserModel(
+        id: 'u_alex',
+        name: 'Alex',
+        avatarUrl: 'https://picsum.photos/seed/alex/100',
+      ),
+    ];
+
     const avatarSize = 32.0;
     const overlap = 10.0;
     final totalWidth =
         avatarSize +
-        (_members.length - 1) * (avatarSize - overlap) +
+        (members.length - 1) * (avatarSize - overlap) +
         avatarSize * 0.6;
 
     return SizedBox(
@@ -563,7 +574,7 @@ class _StackedAvatars extends StatelessWidget {
         children: [
           // +2 badge
           Positioned(
-            left: _members.length * (avatarSize - overlap),
+            left: members.length * (avatarSize - overlap),
             child: Container(
               width: avatarSize,
               height: avatarSize,
@@ -584,7 +595,7 @@ class _StackedAvatars extends StatelessWidget {
             ),
           ),
           // User avatars in reverse order so first is on top
-          for (int i = _members.length - 1; i >= 0; i--)
+          for (int i = members.length - 1; i >= 0; i--)
             Positioned(
               left: i * (avatarSize - overlap),
               child: Container(
@@ -592,7 +603,7 @@ class _StackedAvatars extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.background, width: 2),
                 ),
-                child: UserAvatar(user: _members[i], size: avatarSize),
+                child: UserAvatar(user: members[i], size: avatarSize),
               ),
             ),
         ],
